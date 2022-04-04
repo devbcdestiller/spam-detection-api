@@ -23,8 +23,8 @@ services:
       context: ./rnn_mail
       dockerfile: Dockerfile
     ports:
-        - "8500:8500"
-        - "8501:8501"
+        - "8500"
+        - "8501"
     volumes:
         - ./rnn_mail/models:/models
     networks:
@@ -36,8 +36,8 @@ services:
       context: ./rnn_sms
       dockerfile: Dockerfile
     ports:
-        - "8502:8502"
-        - "8503:8503"
+        - "8502"
+        - "8503"
     volumes:
         - ./rnn_sms/models:/models
     networks:
