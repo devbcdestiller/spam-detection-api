@@ -1,0 +1,47 @@
+version: "3.7"
+services:
+  flask_server:
+    container_name: flask_server
+    build:
+      context: ./flask_server
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./flask_server:/flask_server
+    depends_on:
+      - rnn_mail
+      - rnn_sms
+    networks:
+      flask-network:
+        aliases:
+          - flask_server
+
+  rnn_mail:
+    container_name: rnn_mail
+    build:
+      context: ./rnn_mail
+      dockerfile: Dockerfile
+    ports:
+        - "8500:8500"
+        - "8501:8501"
+    volumes:
+        - ./rnn_mail/models:/models
+    networks:
+      - flask-network
+
+  rnn_sms:
+    container_name: rnn_sms
+    build:
+      context: ./rnn_sms
+      dockerfile: Dockerfile
+    ports:
+        - "8502:8502"
+        - "8503:8503"
+    volumes:
+        - ./rnn_sms/models:/models
+    networks:
+      - flask-network
+
+networks:
+  flask-network:
