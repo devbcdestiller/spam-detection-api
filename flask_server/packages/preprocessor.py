@@ -9,6 +9,7 @@ with open('packages/sms_tokenizer.pkl', 'rb') as f:
     token_sms_dict = pickle.load(f)
 
 
+# encodes string of text into integers
 def encode_message(input_message, tokenizer_dict):
     tokenizer = tokenizer_dict['tokenizer']
     maxlen = tokenizer_dict['max_len']

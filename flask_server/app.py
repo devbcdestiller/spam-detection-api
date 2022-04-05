@@ -6,6 +6,8 @@ import requests
 import json
 
 
+VERSION = 'v1'
+
 # URI which points to the tensorflow-serving model
 RNN_MAIL_URI = 'http://rnn_mail:8501/v1/models/rnnmail_model'
 RNN_SMS_URI = 'http://rnn_sms:8503/v1/models/rnnsms_model'
@@ -13,7 +15,7 @@ RNN_SMS_URI = 'http://rnn_sms:8503/v1/models/rnnsms_model'
 app = Flask(__name__)
 
 
-@app.route('/predict/<string:model>', methods=['POST'])
+@app.route(f'/api/{VERSION}/predict/<string:model>', methods=['POST'])
 def predict(model: str):
     accepted_routes = ['sms', 'mail']
 
@@ -39,7 +41,7 @@ def predict(model: str):
     return jsonify(message=f'OK', precentage=f'{prediction}', classification=f'{classification}')
 
 
-@app.route('/status/<string:model>', methods=['GET'])
+@app.route(f'/api/{VERSION}/status/<string:model>', methods=['GET'])
 def status(model: str):
     accepted_routes = ['sms', 'mail']
 
@@ -58,7 +60,7 @@ def status(model: str):
 
 @app.route('/')
 def index():
-    return 'Welcome! use /predict route to POST inputs \n'
+    return 'Visit https://github.com/devbcdestiller/spam-detection-api to read the docs'
 
 # Comment out code below in production
 if __name__ == '__main__':
