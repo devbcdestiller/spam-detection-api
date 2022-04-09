@@ -28,7 +28,7 @@ where {model} is either `sms` or `mail`.
 
 Request Body
 
-**Content-type:** form-data  
+**Content-type:** `form-data` or `application/json`
 | Key           | Required | Value       | Description                      |
 |---------------|----------|-------------|----------------------------------|
 | input_message | Yes      | text/string | String to be used for inference. |

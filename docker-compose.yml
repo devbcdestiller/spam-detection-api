@@ -6,7 +6,7 @@ services:
       context: ./flask_server
       dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - "80:5000"
     volumes:
       - ./flask_server:/flask_server
     depends_on:

@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from packages.preprocessor import token_mail_dict as mail_tokenizer
 from packages.preprocessor import token_sms_dict as sms_tokenizer
 import packages.preprocessor as preprocessor
@@ -13,16 +14,20 @@ RNN_MAIL_URI = 'http://rnn_mail:8501/v1/models/rnnmail_model'
 RNN_SMS_URI = 'http://rnn_sms:8503/v1/models/rnnsms_model'
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"/v1/*": {"origins": "*"}})
 
 
-@app.route(f'/api/{VERSION}/predict/<string:model>', methods=['POST'])
+@app.route(f'/{VERSION}/predict/<string:model>', methods=['POST'])
 def predict(model: str):
     accepted_routes = ['sms', 'mail']
 
     if model not in accepted_routes:
         return jsonify(message=f'Route {model} not in accepted routes: {accepted_routes}'), 404
 
-    input_message = request.form['input_message']
+    if request.is_json:
+        input_message = request.json['input_message']
+    else:
+        input_message = request.form['input_message']
 
     if model == 'mail':
         encoded_message = preprocessor.encode_message([input_message], mail_tokenizer)
@@ -38,10 +43,10 @@ def predict(model: str):
     prediction = result['predictions'][0][0]
     classification = 'spam' if prediction > 0.5 else 'ham'
 
-    return jsonify(message=f'OK', precentage=f'{prediction}', classification=f'{classification}')
+    return jsonify(model=f'{model}', message=f'{input_message}', spam_precent=f'{prediction*100}', classification=f'{classification}')
 
 
-@app.route(f'/api/{VERSION}/status/<string:model>', methods=['GET'])
+@app.route(f'/{VERSION}/status/<string:model>', methods=['GET'])
 def status(model: str):
     accepted_routes = ['sms', 'mail']
 
@@ -62,6 +67,7 @@ def status(model: str):
 def index():
     return 'Visit https://github.com/devbcdestiller/spam-detection-api to read the docs'
 
+
 # Comment out code below in production
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+# if __name__ == '__main__':
+#     app.run(debug=True, host='0.0.0.0')
