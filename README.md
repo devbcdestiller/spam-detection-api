@@ -17,13 +17,13 @@ Spam classifier using LSTM-Recurrent Neural Networks. Deployed using Tensorflow 
 
 ### Retrieve status of an RNN Model
 
-GET `http://localhost:80/v1/status/{model}`  
+GET `/v1/status/{model}`  
 where {model} is either `sms` or `mail`.  
 Returns the status of the model.
 
 ### Predict input message
 
-POST `http://localhost:80/v1/predict/{model}`  
+POST `/v1/predict/{model}`  
 where {model} is either `sms` or `mail`.
 
 Request Body
