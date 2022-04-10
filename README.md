@@ -30,4 +30,13 @@ Request Body
 **Content-type:** `form-data` or `application/json`  
 | Key           | Required | Value       | Description                      |
 |---------------|----------|-------------|----------------------------------|
-| input_message | Yes      | text/string | String to be used for inference. |
+| input_message | Yes      | text/string | String to be used for inference. |  
+
+Returns the result of the prediction in JSON.  
+| Key            | Value       | Description                      |
+|---------------|-------------|----------------------------------|
+| classification | text/string | ham or spam |
+| message | text/string | The request `input_message`. |
+| model | text/string | Model used for prediction. `sms` or `mail` |
+| spam_percent | float | Probability that the input_message is spam. |
+
