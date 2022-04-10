@@ -43,7 +43,7 @@ def predict(model: str):
     prediction = result['predictions'][0][0]
     classification = 'spam' if prediction > 0.5 else 'ham'
 
-    return jsonify(model=f'{model}', message=f'{input_message}', spam_precent=f'{prediction*100}', classification=f'{classification}')
+    return jsonify(model=f'{model}', message=f'{input_message}', spam_percent=f'{prediction*100}', classification=f'{classification}')
 
 
 @app.route(f'/{VERSION}/status/<string:model>', methods=['GET'])
