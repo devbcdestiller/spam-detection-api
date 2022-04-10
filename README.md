@@ -4,7 +4,6 @@ Spam classifier using LSTM-Recurrent Neural Networks. Deployed using Tensorflow 
 ## Dependencies
 
 - Install [docker](https://docs.docker.com/get-docker/) and [docker compose](https://docs.docker.com/compose/install/)
-- Install [Python](https://www.python.org/downloads/) 
 
 ## Installation
 
@@ -17,13 +16,13 @@ Spam classifier using LSTM-Recurrent Neural Networks. Deployed using Tensorflow 
 
 ### Retrieve status of an RNN Model
 
-GET `/v1/status/{model}`  
+GET `https://spamdetekt-api.ml/v1/status/{model}`  
 where {model} is either `sms` or `mail`.  
 Returns the status of the model.
 
 ### Predict input message
 
-POST `/v1/predict/{model}`  
+POST `https://spamdetekt-api.ml/v1/predict/{model}`  
 where {model} is either `sms` or `mail`.
 
 Request Body
