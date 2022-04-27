@@ -2,6 +2,14 @@
 
 Spam classifier using LSTM-Recurrent Neural Networks. Deployed using Tensorflow Serving and Flask, built with Docker Compose.
 
+## Dependencies
+- Install [docker](https://docs.docker.com/get-docker/) and [docker compose](https://docs.docker.com/compose/install/)
+## Installation
+1. Clone repository with `git clone https://github.com/devbcdestiller/spam-detection-api.git`
+2. `cd spam-detection-api`
+3. `docker-compose build`
+4. `docker-compose up` or `docker-compose up -d` if you want to run it without terminal
+
 ## Usage
 
 ### Retrieve status of a Model
@@ -37,7 +45,7 @@ where {model} is either `sms` or `mail`.
 
 Request Body
 
-**Content-type:** `form-data` or `application/json`  
+**Content-type:** `application/json`  
 | Key           | Required | Value       | Description                      |
 |---------------|----------|-------------|----------------------------------|
 | input_messages | Yes      | array | Array of strings to be used for inference. |  
