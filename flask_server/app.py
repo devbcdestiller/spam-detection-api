@@ -6,8 +6,8 @@ import packages.preprocessor as preprocessor
 import requests
 import json
 
-
 VERSION = 'v1'
+BATCH_LIMIT = 50
 
 # URI which points to the tensorflow-serving model
 RNN_MAIL_URI = 'http://rnn_mail:8501/v1/models/rnnmail_model'
@@ -44,6 +44,43 @@ def predict(model: str):
     classification = 'spam' if prediction > 0.5 else 'ham'
 
     return jsonify(model=f'{model}', message=f'{input_message}', spam_percent=f'{prediction*100}', classification=f'{classification}')
+
+
+@app.route(f'/{VERSION}/predict/batch/<string:model>', methods=['POST'])
+def batch(model: str):
+    accepted_routes = ['sms', 'mail']
+
+    if model not in accepted_routes:
+        return jsonify(message=f'Route {model} not in accepted routes: {accepted_routes}'), 404
+
+    if not request.is_json:
+        return jsonify(message=f'Route batch/{model} accepts only json formatted input.'), 404
+
+    input_messages = request.json['input_messages']
+    
+    if len(input_messages) > BATCH_LIMIT:
+        return jsonify(message=f'Batch limit exceeded. Batch processing only allows a limit of 50 messages.')
+
+    if model == "mail":
+        preprocessed = preprocessor.encode_message(input_messages, mail_tokenizer)
+        request_url = f'{RNN_MAIL_URI}:predict'
+    else:
+        preprocessed = preprocessor.encode_message(input_messages, sms_tokenizer)
+        request_url = f'{RNN_SMS_URI}:predict'
+
+    data = json.dumps({'instances': preprocessed.tolist()})
+    response = requests.post(request_url, data=data)
+    result = json.loads(response.text)
+    predictions = []
+
+    for message, prediction in tuple(zip(input_messages, result['predictions'])):
+        predictions.append({
+            'message': message,
+            'spam_percent': prediction[0] * 100,
+            'classification': 'spam' if prediction[0] > 0.5 else 'ham'
+        })
+
+    return jsonify(length=len(input_messages), model=model, predictions=predictions)
 
 
 @app.route(f'/{VERSION}/status/<string:model>', methods=['GET'])
