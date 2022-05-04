@@ -10,6 +10,7 @@ services:
     volumes:
       - ./flask_server:/flask_server
     depends_on:
+      - memcache
       - rnn_mail
       - rnn_sms
     networks:
@@ -40,6 +41,18 @@ services:
         - "8503"
     volumes:
         - ./rnn_sms/models:/models
+    networks:
+      - flask-network
+
+  memcache:
+    container_name: memcache
+    build:
+      context: ./memcache
+      dockerfile: Dockerfile
+    ports:
+      - "11211"
+    volumes:
+      - ./memcache:/memcache
     networks:
       - flask-network
 

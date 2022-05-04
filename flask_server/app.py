@@ -1,10 +1,13 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from pymemcache.client.base import Client
 from packages.preprocessor import token_mail_dict as mail_tokenizer
 from packages.preprocessor import token_sms_dict as sms_tokenizer
 import packages.preprocessor as preprocessor
+import ast
 import requests
 import json
+import base64
 
 VERSION = 'v1'
 BATCH_LIMIT = 50
@@ -12,6 +15,10 @@ BATCH_LIMIT = 50
 # URI which points to the tensorflow-serving model
 RNN_MAIL_URI = 'http://rnn_mail:8501/v1/models/rnnmail_model'
 RNN_SMS_URI = 'http://rnn_sms:8503/v1/models/rnnsms_model'
+
+# Configure global variables for memcache
+MEMCACHE_CLIENT = Client(('memcache', 11211), no_delay=True)
+MEMCACHE_EXPIRE = 60
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/v1/*": {"origins": "*"}})
@@ -29,6 +36,16 @@ def predict(model: str):
     else:
         input_message = request.form['input_message']
 
+    b64 = base64.urlsafe_b64encode(bytes(input_message, 'utf-8'))
+    memcache_key = b64[-32:-1]
+
+    if MEMCACHE_CLIENT.get(memcache_key) is not None:
+        cached_result = MEMCACHE_CLIENT.get(memcache_key)
+        cached_result = ast.literal_eval(cached_result.decode('utf-8'))
+        prediction = cached_result['percent']
+        classification = cached_result['classification']
+        return jsonify(message='cached prediction', model=f'{model}', input_message=f'{input_message}', spam_percent=f'{prediction*100}', classification=f'{classification}')
+
     if model == 'mail':
         encoded_message = preprocessor.encode_message([input_message], mail_tokenizer)
         request_url = f'{RNN_MAIL_URI}:predict'
@@ -42,8 +59,12 @@ def predict(model: str):
     result = json.loads(response.text)
     prediction = result['predictions'][0][0]
     classification = 'spam' if prediction > 0.5 else 'ham'
+    result = {'percent': prediction,
+              'classification': classification}
 
-    return jsonify(model=f'{model}', message=f'{input_message}', spam_percent=f'{prediction*100}', classification=f'{classification}')
+    MEMCACHE_CLIENT.add(memcache_key, result, expire=MEMCACHE_EXPIRE, noreply=False)
+
+    return jsonify(model=f'{model}', input_message=f'{input_message}', spam_percent=f'{prediction*100}', classification=f'{classification}')
 
 
 @app.route(f'/{VERSION}/predict/batch/<string:model>', methods=['POST'])
